@@ -1,116 +1,88 @@
-import Input from "../input/Input"
-import { CardNumberProps, Position } from "../../\btypes/index.types"
-import { useState } from "react"
-import { isValidLength, isValidNumber } from "../../util/validation"
-import { NO_ERROR, POSITION } from "../../constants/constant"
-import { StyledContainer, StyledInputWrap, StyledErrorMessage } from "../../styled-component/inputs"
-
+import Input from '../input/Input';
+import { CardNumber, CardNumberProps } from '../../\btypes/index.types';
+import { isValidLength, isValidNumber } from '../../util/validation';
+import { NO_ERROR } from '../../constants/constant';
+import { StyledContainer, StyledInputWrap, StyledErrorMessage } from '../../styled-component/inputs';
 
 const CARD_NUMBER_LENGTH = 4;
 
-const errorMessage = {
-    length: '4자리만 입력 가능합니다.',
-    number : '숫자만 입력 가능합니다.'
+const errorMessages = {
+  length: '4자리만 입력 가능합니다.',
+  number: '숫자만 입력 가능합니다.',
+};
+
+const isCardNumberInvalid = (cardNumber: string): boolean => {
+  if (cardNumber === '') return false;
+  if (!isValidLength(cardNumber, CARD_NUMBER_LENGTH)) return true;
+  if (!isValidNumber(cardNumber)) return true;
+  return false;
+};
+
+const getErrorMessage = (cardNumbers: CardNumber) => {
+  let errorMessage = NO_ERROR;
+  Object.values(cardNumbers).forEach((cardNumber) => {
+    if (cardNumber === NO_ERROR) return;
+    if (!isValidLength(cardNumber, CARD_NUMBER_LENGTH)) {
+      errorMessage = errorMessages.length;
+    }
+    if (!isValidNumber(cardNumber)) {
+      errorMessage = errorMessages.number;
+    }
+  });
+  return errorMessage;
+};
+
+function CardNumberInputs({ cardNumber: cardNumbers, changeCardNumber }: CardNumberProps) {
+  const errorMessage = getErrorMessage(cardNumbers);
+
+  return (
+    <StyledContainer>
+      <label htmlFor="">카드 번호</label>
+      <StyledInputWrap>
+        <Input
+          value={cardNumbers['first']}
+          onChange={(e) => {
+            changeCardNumber('first', e.target?.value);
+          }}
+          width="25%"
+          maxLength={CARD_NUMBER_LENGTH}
+          placeholder="1234"
+          isError={isCardNumberInvalid(cardNumbers['first'])}
+        />
+        <Input
+          value={cardNumbers['second']}
+          onChange={(e) => {
+            changeCardNumber('second', e.target?.value);
+          }}
+          width="25%"
+          maxLength={CARD_NUMBER_LENGTH}
+          placeholder="1234"
+          isError={isCardNumberInvalid(cardNumbers['second'])}
+        />
+        <Input
+          value={cardNumbers['third']}
+          onChange={(e) => {
+            changeCardNumber('third', e.target?.value);
+          }}
+          width="25%"
+          maxLength={CARD_NUMBER_LENGTH}
+          placeholder="1234"
+          isError={isCardNumberInvalid(cardNumbers['third'])}
+        />
+        <Input
+          value={cardNumbers['fourth']}
+          onChange={(e) => {
+            changeCardNumber('fourth', e.target?.value);
+          }}
+          width="25%"
+          maxLength={CARD_NUMBER_LENGTH}
+          placeholder="1234"
+          isError={isCardNumberInvalid(cardNumbers['fourth'])}
+        />
+      </StyledInputWrap>
+      <StyledErrorMessage>{errorMessage ?? ''}</StyledErrorMessage>
+    </StyledContainer>
+  );
 }
 
-function CardNumberInputs({cardNumber, changeCardNumber} : CardNumberProps) {
-    const [error, setError] = useState({
-        [POSITION.FIRST]: NO_ERROR,
-        [POSITION.SECOND]: NO_ERROR,
-        [POSITION.THIRD]: NO_ERROR,
-        [POSITION.FOURTH]: NO_ERROR,
-    });
-
-    function checkValidation(position: Position, length: number, number: string) {
-        if (number === NO_ERROR) {
-            setError((prev) => {
-                prev[position] = NO_ERROR
-                return {...prev}
-            })
-            return;
-        }
-
-        if (!isValidLength(number, length)) {
-            setError((prev) => {
-                prev[position] = errorMessage.length
-                return {...prev}
-            })
-            return;
-        } else if (!isValidNumber(number)) {
-            setError((prev) => {
-                prev[position] = errorMessage.number
-                return {...prev}
-            })
-            return;
-        }
-
-        setError((prev) => {
-                prev[position] = NO_ERROR
-                return {...prev}
-            })
-    }
-
-    function getErrorMessage() {
-        for (const key in error) {
-            const typedKey = key as keyof typeof error;
-            if (error[typedKey] !== NO_ERROR) {
-                return error[typedKey]
-            }
-        }
-    }
-
-    return (
-        <StyledContainer>
-            <label htmlFor="">카드 번호</label>
-           <StyledInputWrap>
-                <Input
-                    value={cardNumber['first']}
-                    onChange={(e) =>
-                    {
-                        checkValidation('first', CARD_NUMBER_LENGTH, e.target.value);
-                        changeCardNumber('first', e.target?.value)
-                    }}
-                    width='25%'
-                    maxLength={CARD_NUMBER_LENGTH}
-                    placeholder="1234" 
-                    isError={error['first'] !== NO_ERROR} />
-                <Input 
-                    value={cardNumber['second']} 
-                    onChange={(e) =>
-                    {
-                        checkValidation('second', CARD_NUMBER_LENGTH, e.target.value);
-                        changeCardNumber('second', e.target?.value)
-                    }} 
-                    width='25%' 
-                    maxLength={CARD_NUMBER_LENGTH} 
-                    placeholder='1234' 
-                    isError={error['second'] !== NO_ERROR} />
-                <Input 
-                    value={cardNumber['third']} 
-                    onChange={(e) =>
-                    {
-                        checkValidation('third', CARD_NUMBER_LENGTH, e.target.value);
-                        changeCardNumber('third', e.target?.value)
-                    }} 
-                    width='25%' 
-                    maxLength={CARD_NUMBER_LENGTH} 
-                    placeholder='1234' 
-                    isError={error['third'] !== NO_ERROR} />
-                <Input 
-                    value={cardNumber['fourth']} 
-                    onChange={(e) =>
-                    {
-                        checkValidation('fourth', CARD_NUMBER_LENGTH, e.target.value);
-                        changeCardNumber('fourth', e.target?.value)
-                    }} 
-                    width='25%' 
-                    maxLength={CARD_NUMBER_LENGTH} 
-                    placeholder='1234' 
-                    isError={error['fourth'] !== NO_ERROR} />
-            </StyledInputWrap>
-           {getErrorMessage() ? <StyledErrorMessage>{getErrorMessage()}</StyledErrorMessage> : null}  
-        </StyledContainer>
-    )
-}
-
-export default CardNumberInputs
+export default CardNumberInputs;
